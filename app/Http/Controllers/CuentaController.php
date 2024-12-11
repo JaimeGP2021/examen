@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreCuentaRequest;
-use App\Http\Requests\UpdateCuentaRequest;
+use App\Models\Cliente;
 use App\Models\Cuenta;
+use Illuminate\Http\Request;
 
 class CuentaController extends Controller
 {
@@ -13,7 +13,7 @@ class CuentaController extends Controller
      */
     public function index()
     {
-        //
+        return view('cuentas.index', ['cuentas'=>Cuenta::all()]);
     }
 
     /**
@@ -21,15 +21,22 @@ class CuentaController extends Controller
      */
     public function create()
     {
-        //
+        $clientes = Cliente::all();
+        return view('cuentas.create', ['clientes' => $clientes]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCuentaRequest $request)
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'numero' => 'required|numeric|unique:cuentas,numero',
+            'cliente_id' => 'required|exists:clientes,id',
+        ]);
+        Cuenta::create($validated);
+        session()->flash('exito', 'Cuenta creada correctamente.');
+        return redirect()->route('cuentas.index');
     }
 
     /**
@@ -37,7 +44,7 @@ class CuentaController extends Controller
      */
     public function show(Cuenta $cuenta)
     {
-        //
+        return view('cuentas.show', ['cuenta'=>$cuenta]);
     }
 
     /**
@@ -45,15 +52,26 @@ class CuentaController extends Controller
      */
     public function edit(Cuenta $cuenta)
     {
-        //
+        $clientes = Cliente::all();
+        return view('cuentas.edit', [
+            'cuenta'=>$cuenta,
+            'clientes'=>$clientes
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCuentaRequest $request, Cuenta $cuenta)
+    public function update(Request $request, Cuenta $cuenta)
     {
-        //
+        $validated = $request->validate([
+            'numero' => 'required|numeric',
+            'cliente_id' => 'required|exists:clientes,id',
+        ]);
+        $cuenta->fill($validated);
+        $cuenta->save();
+        session()->flash('exito', 'cuenta modificada correctamente.');
+        return redirect()->route('cuentas.index');
     }
 
     /**
@@ -61,6 +79,7 @@ class CuentaController extends Controller
      */
     public function destroy(Cuenta $cuenta)
     {
-        //
+        $cuenta->delete();
+        return redirect()->route('cuentas.index');
     }
 }

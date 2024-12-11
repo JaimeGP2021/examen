@@ -10,6 +10,10 @@ class Cuenta extends Model
     /** @use HasFactory<\Database\Factories\CuentaFactory> */
     use HasFactory;
 
+    protected $fillable =[
+        'numero',
+    ];
+
     public function cliente() {
         return $this->belongsTo(Cliente::class);
     }
